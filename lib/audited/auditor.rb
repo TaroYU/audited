@@ -202,20 +202,25 @@ module Audited
       end
 
       def audit_create
+        audit_comment = "创建#{I18n.t('Tables')[self.class.to_s.to_sym]}" rescue nil if audit_comment.blank?
         write_audit(action: 'create', audited_changes: audited_attributes,
                     comment: audit_comment)
       end
 
       def audit_update
         unless (changes = audited_changes).empty? && audit_comment.blank?
+          audit_comment = "更新#{I18n.t('Tables')[self.class.to_s.to_sym]}信息" rescue nil if audit_comment.blank?
           write_audit(action: 'update', audited_changes: changes,
                       comment: audit_comment)
         end
       end
 
       def audit_destroy
-        write_audit(action: 'destroy', audited_changes: audited_attributes,
-                    comment: audit_comment) unless new_record?
+        unless new_record?
+          audit_comment = "删除#{I18n.t('Tables')[self.class.to_s.to_sym]}" rescue nil if audit_comment.blank?
+          write_audit(action: 'destroy', audited_changes: audited_attributes,
+                    comment: audit_comment)
+        end
       end
 
       def write_audit(attrs)
