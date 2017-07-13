@@ -214,9 +214,9 @@ module Audited
           if changes["status"].present? || changes["workflow_state"].present?
             if changes["status"].present?
               status = self.class.to_s.constantize::STATUS[changes["status"].last]
-              audit_comment = "执行#{I18n.t(self.class.to_s)[status.to_sym]}操作" rescue nil
+              audit_comment = "#{I18n.t(self.class.to_s)[status.to_sym]}" rescue nil
             elsif changes["workflow_state"].present?
-              audit_comment = "执行#{I18n.t(self.class.to_s)[changes["workflow_state"].last.to_sym]}操作" rescue nil
+              audit_comment = "#{I18n.t(self.class.to_s)[changes["workflow_state"].last.to_sym]}" rescue nil
             end
             write_audit(action: 'update', audited_changes: changes,
                       comment: audit_comment, action_type: 'action')
