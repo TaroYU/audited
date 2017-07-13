@@ -18,6 +18,16 @@ Fixed
 
 - None
 
+# 4.5.1 (2017-07-13)
+
+Breaking changes
+
+- None
+
+Added
+
+- action_type
+
 ## 4.5.0 (2017-05-22)
 
 Breaking changes
