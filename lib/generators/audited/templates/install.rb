@@ -9,6 +9,7 @@ class <%= migration_class_name %> < <%= migration_parent %>
       t.column :user_type, :string
       t.column :username, :string
       t.column :action, :string
+      t.column :action_type, :string
       t.column :audited_changes, :<%= options[:audited_changes_column_type] %>
       t.column :version, :integer, :default => 0
       t.column :comment, :string
@@ -22,6 +23,7 @@ class <%= migration_class_name %> < <%= migration_parent %>
     add_index :audits, [:user_id, :user_type], :name => 'user_index'
     add_index :audits, :request_uuid
     add_index :audits, :created_at
+    add_index :audits, :action_type
   end
 
   def self.down

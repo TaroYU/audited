@@ -51,7 +51,9 @@ module Audited
 
         attr_accessor :audit_comment
 
-        has_many :audits, -> { order(version: :asc) }, as: :auditable, class_name: Audited.audit_class.name
+        has_many :audits, -> { order(version: :desc) }, as: :auditable, class_name: Audited.audit_class.name
+        has_many :change_data_audits, -> { where(action_type: 'change_data').order(version: :desc) }, as: :auditable, class_name: Audited.audit_class.name
+        has_many :action_audits, -> { where("action_type = ? or action = ?", 'action', 'create').order(version: :desc) }, as: :auditable, class_name: Audited.audit_class.name
         Audited.audit_class.audited_class_names << to_s
 
         on = Array(options[:on])
@@ -204,14 +206,25 @@ module Audited
       def audit_create
         audit_comment = "创建#{I18n.t('Tables')[self.class.to_s.to_sym]}" rescue nil if audit_comment.blank?
         write_audit(action: 'create', audited_changes: audited_attributes,
-                    comment: audit_comment)
+                    comment: audit_comment, action_type: 'change_data')
       end
 
       def audit_update
         unless (changes = audited_changes).empty? && audit_comment.blank?
-          audit_comment = "更新#{I18n.t('Tables')[self.class.to_s.to_sym]}信息" rescue nil if audit_comment.blank?
-          write_audit(action: 'update', audited_changes: changes,
-                      comment: audit_comment)
+          if changes["status"].present? || changes["workflow_state"].present?
+            if changes["status"].present?
+              status = self.class.to_s.constantize::STATUS[changes["status"].last]
+              audit_comment = "执行#{I18n.t(self.class.to_s)[status.to_sym]}操作" rescue nil
+            elsif changes["workflow_state"].present?
+              audit_comment = "执行#{I18n.t(self.class.to_s)[changes["workflow_state"].last.to_sym]}操作" rescue nil
+            end
+            write_audit(action: 'update', audited_changes: changes,
+                      comment: audit_comment, action_type: 'action')
+          else
+            audit_comment = "更新#{I18n.t('Tables')[self.class.to_s.to_sym]}信息" rescue nil if audit_comment.blank?
+            write_audit(action: 'update', audited_changes: changes,
+                        comment: audit_comment, action_type: 'change_data')
+          end
         end
       end
 
@@ -219,7 +232,7 @@ module Audited
         unless new_record?
           audit_comment = "删除#{I18n.t('Tables')[self.class.to_s.to_sym]}" rescue nil if audit_comment.blank?
           write_audit(action: 'destroy', audited_changes: audited_attributes,
-                    comment: audit_comment)
+                    comment: audit_comment, action_type: 'change_data')
         end
       end
 
