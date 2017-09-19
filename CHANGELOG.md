@@ -18,6 +18,12 @@ Fixed
 
 - None
 
+# 4.5.2 (2017-09-19)
+
+Changed
+
+- method remote_ip
+
 # 4.5.1 (2017-07-13)
 
 Breaking changes
