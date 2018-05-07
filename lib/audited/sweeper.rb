@@ -18,7 +18,9 @@ module Audited
     end
 
     def current_user
-      lambda { controller.send(Audited.current_user_method) if controller.respond_to?(Audited.current_user_method, true) }
+      lambda {
+        controller.send(Audited.current_user_method) || controller.send(:authenticate_admin_user!) if controller.respond_to?(Audited.current_user_method, true)
+      }
     end
 
     def remote_ip
