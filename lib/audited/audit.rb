@@ -35,7 +35,7 @@ module Audited
 
   class Audit < ::ActiveRecord::Base
     belongs_to :auditable,  polymorphic: true
-    belongs_to :user,       polymorphic: true
+    belongs_to :user,       polymorphic: true, ClassName: 'AdminUser', foreign_key: 'user_id'
     belongs_to :associated, polymorphic: true
 
     before_create :set_version_number, :set_audit_user, :set_request_uuid, :set_remote_address
@@ -159,6 +159,7 @@ module Audited
     def set_audit_user
       self.user ||= ::Audited.store[:audited_user] # from .as_user
       self.user ||= ::Audited.store[:current_user].try!(:call) # from Sweeper
+      self.user ||= ::Audited.store[:authenticate_admin_user!].try!(:call)
       nil # prevent stopping callback chains
     end
 
