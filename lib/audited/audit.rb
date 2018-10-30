@@ -152,7 +152,8 @@ module Audited
     private
 
     def set_version_number
-      max = self.class.auditable_finder(auditable_id, auditable_type).descending.first.try(:version) || 0
+      # max = self.class.auditable_finder(auditable_id, auditable_type).descending.first.try(:version) || 0
+      max = self.class.auditable_finder(auditable_id, auditable_type).size
       self.version = max + 1
     end
 
